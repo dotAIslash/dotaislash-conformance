@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="logo.png" alt="dotAIslash Logo" width="120" />
+
 # ✅ VERSA Conformance Suite
 
 ### Black-box tests for VERSA-compatible runtimes
