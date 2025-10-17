@@ -1,0 +1,42 @@
+{
+  "name": "@dotaislash/conformance",
+  "version": "1.0.0",
+  "description": "Conformance test suite for VERSA 1.0 implementations",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "versa",
+    "conformance",
+    "testing",
+    "validation",
+    "certification"
+  ],
+  "dependencies": {
+    "@dotaislash/schemas": "link:@dotaislash/schemas"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.31",
+    "typescript": "^5.8.3",
+    "vitest": "^1.2.0",
+    "eslint": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0"
+  },
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dotAIslash/dotaislash-conformance.git"
+  },
+  "author": "Alphin Tom <alphinctom@gmail.com>"
+}

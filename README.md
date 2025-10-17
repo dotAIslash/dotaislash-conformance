@@ -1,381 +1,228 @@
-<div align="center">
+# @dotaislash/conformance
 
-<img src="logo.png" alt="dotAIslash Logo" width="120" />
+**VERSA 1.0 Conformance Test Suite**
 
-# ✅ VERSA Conformance Suite
-
-### Black-box tests for VERSA-compatible runtimes
-
-[![License](https://img.shields.io/badge/License-MIT-violet?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/Scenarios-50+-cyan?style=for-the-badge)](./scenarios)
-[![Discussions](https://img.shields.io/github/discussions/dotAIslash/dotaislash-conformance?style=for-the-badge&logo=github&color=lime)](https://github.com/dotAIslash/dotaislash-conformance/discussions)
-
-[**Run Tests**](#-running-tests) · [**VERSA Spec**](https://github.com/dotAIslash/dotaislash-spec) · [**Certify Your Tool**](#-certification)
-
-</div>
+Version: 1.0.0
 
 ---
 
-## 🎯 What is this?
+## Overview
 
-A **comprehensive test suite** that verifies whether a tool correctly implements the VERSA specification. Think of it as the "acid test" for VERSA compliance.
-
-### Why Conformance Testing?
-
-- ✅ **Verify Implementations** - Prove your tool supports VERSA
-- 🐛 **Catch Bugs Early** - Find spec violations before users do
-- 📊 **Measure Coverage** - Track which features are supported
-- 🏆 **Earn Certification** - Display the "VERSA Compatible" badge
+Comprehensive test suite with **70 scenarios** to verify VERSA 1.0 specification compliance.
 
 ---
 
-## 🧪 Test Scenarios
+## Conformance Levels
 
-### Core Scenarios
-
-| Category | Scenarios | Purpose |
-|----------|-----------|---------|
-| **Parsing** | 12 tests | Validate JSON/Markdown parsing |
-| **Merging** | 15 tests | Profile merge strategies |
-| **Validation** | 10 tests | Schema compliance |
-| **Context** | 8 tests | Context assembly |
-| **Permissions** | 5 tests | Security enforcement |
-
-### Scenario Structure
-
-```
-scenarios/
-├── core/
-│   ├── 001-parse-context.json          # Test definition
-│   ├── 001-parse-context.ai/           # Input .ai/ folder
-│   └── 001-parse-context.expected.json # Expected output
-├── profiles/
-│   ├── 010-deep-merge.json
-│   ├── 010-deep-merge.ai/
-│   └── 010-deep-merge.expected.json
-└── edge-cases/
-    ├── 050-circular-deps.json
-    ├── 050-circular-deps.ai/
-    └── 050-circular-deps.expected.json
-```
+| Level | Requirements |
+|-------|--------------|
+| **Full** | All MUST scenarios pass, all SHOULD scenarios pass |
+| **High** | All MUST scenarios pass, most SHOULD scenarios pass (≥90%) |
+| **Basic** | All MUST scenarios pass, some SHOULD scenarios pass (≥70%) |
+| **Partial** | Most MUST scenarios pass (≥80%) |
+| **None** | Many MUST scenarios fail (<80%) |
 
 ---
 
-## 🚀 Quick Start
-
-### Run Tests Against Your Tool
+## Installation
 
 ```bash
-# Clone the suite
-git clone https://github.com/dotAIslash/dotaislash-conformance.git
-cd dotaislash-conformance
-
-# Install dependencies
-pnpm install
-
-# Run all tests against your implementation
-pnpm test --adapter ./path/to/your-adapter
-
-# Run specific category
-pnpm test:core --adapter ./path/to/your-adapter
-pnpm test:profiles --adapter ./path/to/your-adapter
-
-# Generate report
-pnpm test:report --adapter ./path/to/your-adapter
+bun add @dotaislash/conformance
 ```
 
 ---
 
-## 📋 Test Categories
+## Usage
 
-### 1. **Core Parsing Tests**
-
-Verify basic `.ai/` folder parsing:
-
-- ✅ Parse valid `context.json`
-- ✅ Handle missing optional fields
-- ✅ Reject invalid JSON
-- ✅ Parse Markdown rules with `ai:meta`
-- ✅ Handle file references
-- ✅ Validate version field
-
-### 2. **Profile Merging Tests**
-
-Test merge strategies:
-
-- ✅ Deep merge objects
-- ✅ Shallow merge arrays
-- ✅ Replace mode
-- ✅ Nested merging
-- ✅ Array concatenation
-- ✅ Priority handling
-
-### 3. **Validation Tests**
-
-Schema compliance:
-
-- ✅ Required fields present
-- ✅ Type checking
-- ✅ Format validation
-- ✅ Enum constraints
-- ✅ Pattern matching
-- ✅ Cross-field validation
-
-### 4. **Context Assembly Tests**
-
-Build complete context:
-
-- ✅ Load all rules
-- ✅ Resolve file patterns
-- ✅ Include agent configs
-- ✅ Merge tool definitions
-- ✅ Apply permissions
-- ✅ Handle circular refs
-
-### 5. **Permission Tests**
-
-Security enforcement:
-
-- ✅ File access controls
-- ✅ Network permissions
-- ✅ Secret bindings
-- ✅ Deny-first policy
-- ✅ Ask-before-run
-
----
-
-## 🔧 Adapter Interface
-
-To test your tool, implement the `ConformanceAdapter` interface:
+### Run All Scenarios
 
 ```typescript
-interface ConformanceAdapter {
-  // Load and parse .ai/ folder
-  loadConfig(path: string): Promise<VersaConfig>;
-  
-  // Merge profile with base config
-  mergeProfile(base: VersaConfig, profile: VersaConfig): Promise<VersaConfig>;
-  
-  // Assemble complete context
-  assembleContext(config: VersaConfig, options: ContextOptions): Promise<Context>;
-  
-  // Validate configuration
-  validate(config: VersaConfig): Promise<ValidationResult>;
-}
+import { allScenarios, runConformanceSuite, generateReport } from '@dotaislash/conformance';
+
+const result = await runConformanceSuite(allScenarios);
+console.log(generateReport(result));
 ```
 
-### Example Adapter
+### Run Specific Category
 
 ```typescript
-import { ConformanceAdapter } from '@dotaislash/conformance';
+import { schemaScenarios, runConformanceSuite } from '@dotaislash/conformance';
 
-export class MyToolAdapter implements ConformanceAdapter {
-  async loadConfig(path: string): Promise<VersaConfig> {
-    // Your implementation here
-    const context = await fs.readFile(`${path}/context.json`, 'utf-8');
-    return JSON.parse(context);
-  }
+const result = await runConformanceSuite(schemaScenarios);
+console.log(`Passed: ${result.passed}/${result.total}`);
+```
 
-  async mergeProfile(base: VersaConfig, profile: VersaConfig): Promise<VersaConfig> {
-    // Your merge logic
-    return deepMerge(base, profile);
-  }
+---
 
-  async assembleContext(config: VersaConfig, options: ContextOptions): Promise<Context> {
-    // Your context assembly
-    return {
-      rules: await this.loadRules(config.rules),
-      settings: config.settings,
-      // ...
-    };
-  }
+## Scenarios
 
-  async validate(config: VersaConfig): Promise<ValidationResult> {
-    // Your validation logic
-    return { valid: true, errors: [] };
-  }
+### Schema (10 scenarios)
+- Minimal context validation
+- Version requirements
+- Metadata structure
+- Rules array format
+- Settings validation
+- Profile schema
+- Agent schema
+- Permissions structure
+
+### Merge (10 scenarios)
+- Deep merge array concatenation
+- Deep merge object recursion
+- Deep merge primitive overrides
+- Deep merge null/undefined handling
+- Shallow merge behavior
+- Replace mode
+- Merge strategy validation
+
+### Context (10 scenarios)
+- File location requirements
+- JSON validity
+- File path conventions
+- Optional fields
+- UTF-8 encoding
+
+### Profile (10 scenarios)
+- Profile location
+- Naming conventions
+- Required fields
+- Merge strategies
+- Multiple profiles
+- Validation
+
+### Rules (10 scenarios)
+- Markdown format
+- Folder location
+- Front matter (optional)
+- Metadata structure
+- Priority levels
+- Attach modes
+- Scope options
+
+### CLI (10 scenarios)
+- Init command
+- Lint/validate command
+- Print/export command
+- Profile selection
+- Exit codes
+- Help text
+
+### Permissions (10 scenarios)
+- File permissions
+- Network permissions
+- Command permissions
+- Deny precedence
+- Glob patterns
+- Optional behavior
+
+---
+
+## API
+
+### `runConformanceSuite(scenarios: ConformanceScenario[]): Promise<ConformanceSuiteResult>`
+
+Execute scenarios and return results.
+
+### `calculateConformanceLevel(result: ConformanceSuiteResult): ConformanceLevel`
+
+Determine conformance level based on pass/fail rates.
+
+### `generateReport(result: ConformanceSuiteResult): string`
+
+Generate markdown conformance report.
+
+---
+
+## Example Output
+
+```
+# VERSA 1.0 Conformance Report
+
+**Conformance Level:** FULL
+
+## Summary
+
+- Total Scenarios: 70
+- Passed: 70
+- Failed: 0
+- Pass Rate: 100.0%
+
+## By Category
+
+| Category | Total | Passed | Failed | Rate |
+|----------|-------|--------|--------|------|
+| schema | 10 | 10 | 0 | 100% |
+| merge | 10 | 10 | 0 | 100% |
+| context | 10 | 10 | 0 | 100% |
+| profile | 10 | 10 | 0 | 100% |
+| rules | 10 | 10 | 0 | 100% |
+| cli | 10 | 10 | 0 | 100% |
+| permissions | 10 | 10 | 0 | 100% |
+
+## By Priority
+
+| Priority | Total | Passed | Rate |
+|----------|-------|--------|------|
+| MUST | 45 | 45 | 100% |
+| SHOULD | 20 | 20 | 100% |
+| MAY | 5 | 5 | 100% |
+```
+
+---
+
+## Scenario Structure
+
+```typescript
+interface ConformanceScenario {
+  id: string;                    // Unique ID (e.g., 'schema-001')
+  name: string;                  // Human-readable name
+  description: string;           // What is being tested
+  category: ConformanceCategory; // Test category
+  priority: 'must' | 'should' | 'may'; // RFC 2119 keywords
+  specRef?: string;              // Reference to spec section
+  test: () => ConformanceResult; // Test function
 }
 ```
 
 ---
 
-## 📊 Test Report
+## Testing Your Implementation
 
-After running tests, you get a comprehensive report:
+```typescript
+// Create test scenarios for your implementation
+import { type ConformanceScenario } from '@dotaislash/conformance';
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║  VERSA Conformance Test Report                                   ║
-╚══════════════════════════════════════════════════════════════════╝
+const myImplementationTests: ConformanceScenario[] = [
+  {
+    id: 'impl-001',
+    name: 'My implementation validates context',
+    description: 'Test that my validator works',
+    category: 'schema',
+    priority: 'must',
+    test: () => {
+      const result = myValidator.validate({ version: '1.0' });
+      return { passed: result.valid };
+    }
+  }
+];
 
-Tool: MyTool v1.0.0
-Date: 2025-10-16
-Spec Version: VERSA 1.0
+// Run against conformance suite
+import { allScenarios, runConformanceSuite } from '@dotaislash/conformance';
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Overall: 45/50 PASSED (90%)
-
-Category Breakdown:
-  ✅ Core Parsing       12/12 (100%)
-  ✅ Profile Merging    13/15 (87%)
-  ✅ Validation         10/10 (100%)
-  ⚠️  Context Assembly   7/8  (88%)
-  ✅ Permissions         3/5  (60%)
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Failed Tests:
-
-  ❌ profiles/014-array-concat
-     Expected: Arrays to concatenate
-     Got: Arrays replaced
-
-  ❌ context/007-circular-reference
-     Expected: Error detected
-     Got: Infinite loop
-
-  ❌ permissions/003-secret-binding
-     Expected: Secret not exposed
-     Got: Secret in plain text
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Recommendation: Fix failed tests to earn VERSA certification.
+const fullSuite = [...allScenarios, ...myImplementationTests];
+const result = await runConformanceSuite(fullSuite);
 ```
 
 ---
 
-## 🏆 Certification
+## License
 
-### Certification Levels
-
-**🥇 Gold - Full Compliance (100%)**
-- All tests pass
-- Badge: `![VERSA Certified](https://img.shields.io/badge/VERSA-Certified%20Gold-gold)`
-- Listed on official website
-
-**🥈 Silver - High Compliance (90-99%)**
-- Most tests pass with minor gaps
-- Badge: `![VERSA Compatible](https://img.shields.io/badge/VERSA-Compatible-silver)`
-
-**🥉 Bronze - Basic Compliance (75-89%)**
-- Core features work
-- Badge: `![VERSA Basic](https://img.shields.io/badge/VERSA-Basic-bronze)`
-
-### Certification Process
-
-1. **Run Tests**
-```bash
-pnpm test --adapter ./your-adapter
-```
-
-2. **Generate Report**
-```bash
-pnpm test:report --adapter ./your-adapter --output report.json
-```
-
-3. **Submit for Review**
-```bash
-gh issue create --title "Certification Request: MyTool" \
-  --body "$(cat report.json)"
-```
-
-4. **Receive Badge**
-Once approved, add badge to your README:
-```markdown
-![VERSA Certified](https://img.shields.io/badge/VERSA-Certified-gold)
-```
+MIT © dotAIslash
 
 ---
 
-## 🧰 Test Development
+## Links
 
-### Adding New Tests
-
-```bash
-# 1. Create test scenario
-mkdir scenarios/new-category/100-my-test.ai
-cd scenarios/new-category/
-
-# 2. Create test definition
-cat > 100-my-test.json << EOF
-{
-  "id": "100",
-  "name": "My Test",
-  "category": "new-category",
-  "description": "Tests something important",
-  "severity": "required",
-  "input": "100-my-test.ai",
-  "expected": "100-my-test.expected.json"
-}
-EOF
-
-# 3. Create test input (.ai/ folder)
-mkdir 100-my-test.ai
-echo '{"version":"1.0"}' > 100-my-test.ai/context.json
-
-# 4. Create expected output
-cat > 100-my-test.expected.json << EOF
-{
-  "success": true,
-  "config": {"version": "1.0"}
-}
-EOF
-
-# 5. Run test
-pnpm test:single 100
-```
-
----
-
-## 📚 Documentation
-
-- [Test Specification](docs/TEST_SPEC.md)
-- [Adapter Guide](docs/ADAPTER_GUIDE.md)
-- [Writing Tests](docs/WRITING_TESTS.md)
-- [Certification Process](docs/CERTIFICATION.md)
-
----
-
-## 🤝 Contributing
-
-Help improve VERSA conformance!
-
-### Ways to Contribute
-
-- 🧪 **Add Test Scenarios** - Cover edge cases
-- 🐛 **Report Issues** - Found a problem?
-- 📝 **Improve Docs** - Help others understand
-- 🔧 **Build Adapters** - Test more tools
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
-
-## 📊 Tool Support
-
-| Tool | Status | Pass Rate | Version Tested |
-|------|--------|-----------|----------------|
-| Cursor | 🟡 In Progress | 85% | - |
-| Windsurf | 🔴 Not Tested | - | - |
-| Aider | 🔴 Not Tested | - | - |
-| Claude | 🔴 Not Tested | - | - |
-
----
-
-## 📄 License
-
-MIT © [dotAIslash](https://github.com/dotAIslash)
-
----
-
-<div align="center">
-
-**Ensuring VERSA works the same everywhere**
-
-[Spec](https://github.com/dotAIslash/dotaislash-spec) · [CLI](https://github.com/dotAIslash/dotaislash-cli) · [Schemas](https://github.com/dotAIslash/dotaislash-schemas) · [Examples](https://github.com/dotAIslash/dotaislash-examples)
-
-[⭐ Star us on GitHub](https://github.com/dotAIslash/dotaislash-conformance) · [💬 Discussions](https://github.com/dotAIslash/dotaislash-conformance/discussions)
-
-</div>
+- [VERSA Specification](https://github.com/dotAIslash/dotaislash-spec)
+- [Schemas Package](https://github.com/dotAIslash/dotaislash-schemas)
+- [CLI Tool](https://github.com/dotAIslash/dotaislash-cli)
